@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  fastapi-app:
+    build: .
+    ports:
+      - "8082:8082"
+    command: ["fastapi", "run", "main.py", "--port", "8082"]
+

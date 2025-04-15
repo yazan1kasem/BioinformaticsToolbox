@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .form-container {
+            max-width: 600px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+        }
+
+        .btn-submit {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+    </style>
+
+    <div class="form-container">
+        <h2 class="mb-4 text-center">MSA Input Formular</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="MSAInput" class="form-label">MSA Eingabe</label>
+                <textarea class="form-control" id="MSAInput" name="MSAInput" rows="6"
+                          placeholder="Geben Sie Ihre MSA-Daten hier ein..."></textarea>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" id="ClustalW"  name="alignmentTool" value="ClustalW">
+                <label class="form-check-label" for="ClustalW">
+                    ClustalW
+                </label>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" id="MUSCLE" checked="checked" name="alignmentTool" value="MUSCLE">
+                <label class="form-check-label" for="MUSCLE">
+                    MUSCLE
+                </label>
+            </div>
+            <button type="submit" class="btn btn-submit w-100">Absenden</button>
+        </form>
+
+    </div>
+
+<div id="msa"></div>
+<script>
+    var msaViewer = new msa.msa({
+        el: document.getElementById("msa"),
+        vis: { conserv: false },
+        seqs: msa.io.clustal.parse({{ msa_data|safe }})
+    });
+    msaViewer.render();
+</script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

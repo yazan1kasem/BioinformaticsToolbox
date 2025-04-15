@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  muscle:
+    image: biocontainers/muscle:v1-3.8.1551-2-deb_cv1
+    stdin_open: true
+    tty: true
+    command: sh
+    volumes:
+      - ./containerfiles:/containerfiles
+    restart: unless-stopped
+
+  clustalw:
+    image: biocontainers/clustalw:v2.1lgpl-6-deb_cv1
+    stdin_open: true
+    tty: true
+    command: sh
+    volumes:
+      - ./containerfiles:/containerfiles
+    restart: unless-stopped
+
+  phylo:
+    image: biocontainers/raxml:v8.2.12dfsg-1-deb_cv1
+    volumes:
+      - ./containerfiles:/containerfiles
+    stdin_open: true
+    tty: true
+
+
+

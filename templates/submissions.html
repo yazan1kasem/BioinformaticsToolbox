@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Submissions</h1>
+
+    {% if submissions %}
+        <div class="row">
+            {% for submission in submissions %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <!-- Replace text_input with the correct field name from your model -->
+                            <h5 class="card-title">{{ submission.text_input|upper }} ({{ submission.text_input|length }}) </h5>
+
+                        
+                            <!-- Display file upload if it exists -->
+                            {% if submission.file_upload %}
+                                <p class="card-text">                          
+                                    <!-- Ensure the path points to the 'uploads' folder -->
+                                    <a href="{{ submission.file_upload.url }}" target="_blank">{{ submission.file_upload}}</a>
+                                </p>
+                            {% else %}
+                                <p class="card-text text-muted">No file uploaded</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">No submissions available.</p>
+    {% endif %}
+</div>
+{% endblock %}

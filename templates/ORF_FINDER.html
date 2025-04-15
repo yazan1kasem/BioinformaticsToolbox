@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 900px;
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-custom:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+        .orf-section {
+            margin-top: 2rem;
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .orf-details {
+            background-color: #e9ecef;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+                
+    </style>
+
+    <h2 class="mb-4 text-center">Open Reading Frame (ORF) Analyse</h2>
+
+    <form method="post" enctype="multipart/form-data" class="border p-4 rounded shadow">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="dna_sequence" class="form-label">DNA-Sequenz</label>
+            <textarea class="form-control" id="dna_sequence" rows="4" placeholder="Geben Sie die DNA-Sequenz ein" name="dna_sequence"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="min_orf_length" class="form-label">Minimale ORF-Länge</label>
+            <input type="number" value="10" step="10" min="0"  class="form-control" id="min_orf_length" placeholder="Minimale Länge des ORF" name="min_orf_length">
+        </div>
+
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="both-strands" name="both-strands">
+            <label class="form-check-label" for="both-strands">
+                Auf beiden DNA-Strängen (vorwärts und rückwärts) suchen
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-custom w-100" value="Analyse starten">Analyse starten</button>
+    </form>
+    {% if info %}
+        <div class="alert alert-info mt-3">
+            {{ info }}
+        </div>
+    {% endif %}
+    {% if orf_data %}
+<div class="orf-section mt-5">
+    <h3>Gefundene ORFs 
+        <form method="post"  style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="download" value="true">
+            <button type="submit" class="btn btn-custom">Download ORFs als TXT</button>
+        </form>
+    </h3>    {% if orf_data %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Start</th>
+                    <th>Ende</th>
+                    <th>Strands</th>
+                    <th>Length (nt | aa)</th>
+                    <th>Sequenz</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for orf in orf_data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ orf.start }}</td>
+                    <td>{{ orf.end }}</td>
+                    <td>{{ orf.strand }}</td>
+                    <td>{{ orf.length_nt }} | {{ orf.length_aa }}</td>
+                    <td>
+                        <pre style="white-space: pre-wrap; word-wrap: break-word; max-width: 370px">{{ orf.sequence }}</pre>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Keine ORFs gefunden.</p>
+    {% endif %}
+</div>
+    {% endif %}
+{% if results %}
+<div class="blast-section mt-5">
+    <h3>BLAST-Ergebnisse</h3>
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Beschreibung</th>
+                <th>E-Value</th>
+                <th>Bit-Score</th>
+                <th>Identität (%)</th>
+                <th>Alignmentlänge</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for hit in results %}
+            <tr>
+                <td>{{ hit.description }}</td>
+                <td>{{ hit.evalue }}</td>
+                <td>{{ hit.bit_score }}</td>
+                <td>{{ hit.identity }}</td>
+                <td>{{ hit.alignment_length }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
