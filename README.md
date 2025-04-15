@@ -2,39 +2,70 @@
 
 ## Projektbeschreibung
 
-Die **Bioinformatics Toolbox** ist eine containerisierte Anwendung zur Analyse biologischer Sequenzdaten. Sie vereint klassische bioinformatische Methoden wie Multiple Sequence Alignment (MSA), phylogenetische Baumgenerierung und FASTA-Verarbeitung in einer modularen Struktur. Die Anwendung nutzt Python, ist Docker-kompatibel und über eine Weboberfläche zugänglich.
+Die **Bioinformatics Toolbox** ist eine modular aufgebaute, containerisierte Webanwendung zur Analyse biologischer Sequenzdaten. Sie umfasst klassische bioinformatische Methoden wie Multiple Sequence Alignment (MSA), phylogenetische Baumkonstruktion, Open Reading Frame (ORF)-Suche sowie eine webbasierte Benutzeroberfläche zur Dateiverwaltung und Visualisierung.
 
-Dieses Projekt wurde für Ausbildungs- und Forschungszwecke entwickelt und kann lokal oder serverseitig bereitgestellt werden.
+Diese Anwendung ist vollständig mit Docker lauffähig und unterstützt etablierte Bioinformatiktools wie **MUSCLE**, **ClustalW** und **RAxML** über offizielle BioContainer-Images.
 
 ---
 
 ## Hauptfunktionen
 
 ### 1. Multiple Sequence Alignment (MSA)
-Die Toolbox ermöglicht das Einlesen mehrerer FASTA-Sequenzen und führt ein MSA durch. Ziel ist es, evolutionäre Verwandtschaften, konservierte Regionen und Mutationen zu analysieren.
 
-### 2. Phylogenetischer Baum
-Basierend auf den Alignments wird ein phylogenetischer Baum erzeugt. Die Darstellung erfolgt als Grafik, die die evolutionäre Nähe visualisiert.
+Die Toolbox bietet automatisiertes MSA durch Containerintegration von:
+- `MUSCLE` (Multiple Sequence Comparison by Log-Expectation)
+- `ClustalW`
 
-### 3. FASTA-Datei-Verarbeitung
-Benutzer können eigene FASTA-Dateien hochladen. Das System erkennt und extrahiert Sequenzinformationen automatisch und stellt diese zur weiteren Analyse bereit.
+```text
+Ziel: Identifikation konservierter Sequenzmuster und Erstellung evolutionärer Hypothesen.
+```
 
-### 4. Webbasierte Benutzeroberfläche
-Eine einfache HTML-basierte GUI (über Flask Templates) ermöglicht Uploads, Auswahl von Funktionen und Visualisierung der Ergebnisse.
-
-### 5. Ordnerstruktur mit Uploads
-Im Upload-Verzeichnis werden Benutzerdateien abgelegt, geparst und je nach Funktion in den Analysefluss eingebunden.
+![image](https://github.com/user-attachments/assets/876db3ba-5612-4e86-8d53-400a713763d7)
+*Abbildung: MSA-Ansicht*
 
 ---
 
-## Docker & Containerstruktur
+### 2. Phylogenetischer Baum
 
-Das gesamte Projekt ist dockerisiert. Die `docker-compose.yml` orchestriert die Umgebung und startet den Webserver sowie alle notwendigen Services.
+Mit Hilfe von **RAxML** (Randomized Axelerated Maximum Likelihood) wird ein phylogenetischer Baum auf Basis der MSA-Ergebnisse generiert und grafisch ausgegeben.
 
-### docker-compose.yml
+![image](https://github.com/user-attachments/assets/aca199ec-6ef8-45fa-8b03-eebc6de56c4a)
+*Abbildung: FASTA-Eingabe*
+
+![phylo_tree](https://github.com/user-attachments/assets/7c54f5af-1c9f-4546-89d2-8970e2e70cc8)
+*Abbildung: Ausgabe (Phylogenetischer Baum)*
+
+---
+
+### 3. FASTA-Datei-Verarbeitung
+
+- Unterstützung für individuelle FASTA-Uploads
+- Dynamische Erkennung von Sequenzstruktur
+- Übergabe an ORF-, MSA- oder Phylogenie-Komponenten
+
+---
+
+### 4. ORF-Finder
+
+Der integrierte ORF-Finder identifiziert potenzielle proteincodierende Bereiche auf beiden DNA-Strängen und in allen sechs Leserastern. Die Ausgabe enthält Position, Länge und Sequenz.
+
+![image](https://github.com/user-attachments/assets/f223cde4-403f-4238-ad10-09d14342af2e)
+*Abbildung: ORF-FINDER Ansicht*
+
+---
+
+### 5. Webbasierte Benutzeroberfläche
+
+Die App nutzt Flask + HTML-Templates zur Dateiverwaltung, Analyseauswahl und grafischen Darstellung der Ergebnisse.
+
+---
+
+## Containerisierte Infrastruktur
+
+### docker-compose.yml (verbessert)
 
 ```yaml
-version: '3'
+version: '3.9'
 services:
   app:
     build: .
@@ -44,9 +75,41 @@ services:
       - .:/app
     environment:
       - FLASK_ENV=development
+    depends_on:
+      - muscle
+      - clustalw
+      - phylo
+
+  muscle:
+    image: biocontainers/muscle:v1.3.8.1551-2-deb_cv1
+    stdin_open: true
+    tty: true
+    command: sh
+    volumes:
+      - ./containerfiles:/containerfiles
+    restart: unless-stopped
+
+  clustalw:
+    image: biocontainers/clustalw:v2.1lgpl-6-deb_cv1
+    stdin_open: true
+    tty: true
+    command: sh
+    volumes:
+      - ./containerfiles:/containerfiles
+    restart: unless-stopped
+
+  phylo:
+    image: biocontainers/raxml:v8.2.12dfsg-1-deb_cv1
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./containerfiles:/containerfiles
+    restart: unless-stopped
 ```
 
-### Dockerfile
+---
+
+## Dockerfile
 
 ```Dockerfile
 FROM python:3.9-slim
@@ -56,52 +119,38 @@ RUN pip install --no-cache-dir -r requirements.txt
 CMD ["python", "manage.py"]
 ```
 
-- **`build: .`** – verwendet den lokalen Ordner zum Bauen des Containers
-- **`volumes`** – ermöglicht Änderungen am Code ohne Rebuild
-- **`FLASK_ENV=development`** – sorgt für automatisches Neuladen
-- **`manage.py`** – zentraler Einstiegspunkt zum Start der Webanwendung
-
 ---
 
 ## Projektstruktur
 
 ```
 BioinformaticsToolbox/
-├── msa3/                      → MSA-Logik
-├── phylogenetischen Baums/   → Phylogenie-Funktionen
-├── sequencetools/            → FASTA-Verarbeitung
-├── uploads/                  → Benutzerdateien
-├── templates/                → HTML-Templates
-├── containerfiles/           → Docker- und Build-Dateien
-├── db.sqlite3                → Lokale Datenbank
-├── docker-compose.yml        → Multi-Service-Konfiguration
-├── Dockerfile                → Container-Builddefinition
-├── manage.py                 → Haupt-Entry-Point (Flask App)
-├── requirements.txt          → Python-Abhängigkeiten
+├── msa3/                    → MSA-Funktionen
+├── phylogenie/             → Baumkonstruktion
+├── orf/                    → ORF-Analyse
+├── templates/              → Frontend-Vorlagen
+├── uploads/                → Benutzer-Uploads
+├── containerfiles/         → Gemeinsame Volumes
+├── docker-compose.yml      → Multi-Service Definition
+├── Dockerfile              → Container-Build der App
+├── manage.py               → Einstiegspunkt
+├── requirements.txt        → Python-Abhängigkeiten
 ```
 
 ---
 
-## Ausführung
+## Anwendung starten
 
-1. Repository klonen  
-   ```bash
-   git clone https://github.com/yazan1kasem/BioinformaticsToolbox.git
-   cd BioinformaticsToolbox
-   ```
+```bash
+git clone https://github.com/yazan1kasem/BioinformaticsToolbox.git
+cd BioinformaticsToolbox
+docker-compose up --build
+```
 
-2. Anwendung mit Docker starten  
-   ```bash
-   docker-compose up --build
-   ```
-
-3. Webanwendung aufrufen  
-   ```
-   http://localhost:5000
-   ```
+Im Browser öffnen: `http://localhost:5000`
 
 ---
 
 ## Lizenz
 
-Dieses Projekt ist für Bildungs- und Forschungszwecke lizenziert. Für die kommerzielle Nutzung ist die Zustimmung des Autors erforderlich.
+Dieses Projekt ist ausschließlich für Forschungs- und Ausbildungszwecke bestimmt. Die kommerzielle Nutzung bedarf der vorherigen Genehmigung des Autors.
