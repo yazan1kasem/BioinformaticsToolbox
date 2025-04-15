@@ -33,6 +33,7 @@ Mit Hilfe von **RAxML** (Randomized Axelerated Maximum Likelihood) wird ein phyl
 *Abbildung: FASTA-Eingabe*
 
 ![phylo_tree](https://github.com/user-attachments/assets/7c54f5af-1c9f-4546-89d2-8970e2e70cc8) 
+
 *Abbildung: Ausgabe (Phylogenetischer Baum)*
 
 ---
