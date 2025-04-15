@@ -2,7 +2,7 @@
 
 ## Projektbeschreibung
 
-Die **Bioinformatics Toolbox** ist eine modular aufgebaute, containerisierte Webanwendung zur Analyse biologischer Sequenzdaten. Sie umfasst klassische bioinformatische Methoden wie Multiple Sequence Alignment (MSA), phylogenetische Baumkonstruktion, Open Reading Frame (ORF)-Suche sowie eine webbasierte Benutzeroberfläche zur Dateiverwaltung und Visualisierung.
+Die **Bioinformatics Toolbox** ist eine modular aufgebaute, containerisierte Webanwendung **(DJANGO)** zur Analyse biologischer Sequenzdaten. Sie umfasst klassische bioinformatische Methoden wie Multiple Sequence Alignment (MSA), phylogenetische Baumkonstruktion, Open Reading Frame (ORF)-Suche sowie eine webbasierte Benutzeroberfläche zur Dateiverwaltung und Visualisierung.
 
 Diese Anwendung ist vollständig mit Docker lauffähig und unterstützt etablierte Bioinformatiktools wie **MUSCLE**, **ClustalW** und **RAxML** über offizielle BioContainer-Images.
 
